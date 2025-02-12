@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Inventory System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+          crossorigin="anonymous">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Inventory System</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Transaction Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownTransaction" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Transaction
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownTransaction">
+                        <li><a class="dropdown-item" href="stockIssuance">Stock Issuance</a></li>
+                    </ul>
+                </li>
+                <!-- Report Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownReport" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Report
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownReport">
+                        <li><a class="dropdown-item" href="#">Inventory Records</a></li>
+                    </ul>
+                </li>
+                <!-- Maintenance Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMaintenance" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Maintenance
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMaintenance">
+                        <li><a class="dropdown-item" href="#">Product Maintenance</a></li>
+                    </ul>
+                </li>
+                <!-- Logout -->
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="confirmLogout()">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row">
+        <h1 class="text-center">
+            Welcome <span th:text="${name}"></span> to the Inventory System
+        </h1>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function confirmLogout() {
+        let confirmAction = confirm("Are you sure you want to logout?");
+        if (confirmAction) {
+            window.location.href = "/login"; // Redirects to login page
+        }
+    }
+</script>
+
+</body>
+</html>

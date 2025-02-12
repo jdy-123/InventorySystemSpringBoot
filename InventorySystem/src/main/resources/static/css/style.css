@@ -1,0 +1,128 @@
+body {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    margin: 0;
+}
+
+.sidebar {
+    position: fixed;
+    width: 250px;
+    background-color: #800000;
+    color: white;
+    padding: 15px;
+    height: 100vh;
+    top: 50px;
+    left: 0;
+    overflow-y: auto;
+    transition: transform 0.3s ease-in-out; /* Smooth transition for hiding */
+}
+
+.sidebar.hidden {
+    transform: translateX(-80%); /* Moves the sidebar off-screen */
+}
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.content {
+    margin-left: 250px;
+    margin-top: 60px;
+    padding: 20px;
+    background-color: #FFFFFF;
+    overflow-y: auto;
+    height: calc(100vh - 60px);
+    width: calc(100% - 250px);
+    transition: width 0.3s ease-in-out, margin-left 0.3s ease-in-out; /* Smooth transition for content resizing */
+}
+
+.content.expanded {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* Sidebar toggle button style */
+.toggle-btn {
+    position: absolute;
+    top: -8px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1001; /* To ensure the button is on top of other content */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+    word-wrap: break-word;
+}
+
+th {
+    background-color: #f8f9fa;
+}
+
+.quantity, .adjustment {
+    width: 150px;
+}
+
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.btn {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.disabled-btn {
+    background-color: #ddd;
+}
+
+.sidebar input[type="date"] {
+    margin-bottom: 15px;
+}
+
+.sidebar button {
+    margin-top: 10px;
+}
+
+.form-select:disabled, .form-control:disabled {
+    background-color: #f5f5f5;
+    color: #6c757d;
+}
+
+.table-container {
+    max-height: 85%; /* Adjust height as needed */
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid #ddd; /* Optional: Add a border */
+}
+
+/* Keep the table header fixed */
+.table thead th {
+    position: sticky;
+    top: 0;
+    background: #343a40; /* Match table header color */
+    color: white;
+    z-index: 2;
+}
+
+th:nth-child(1),
+td:nth-child(1) {
+    display: none;
+}
