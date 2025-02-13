@@ -1,6 +1,7 @@
 package com.inventorySystem.service.impl.StockIssuance;
 
 import com.inventorySystem.Model.StockIssuance;
+import com.inventorySystem.dto.StockIssuanceDto;
 import org.springframework.data.domain.Page;
 
 import java.util.Optional;
@@ -27,4 +28,6 @@ public interface StockIssuanceService {
      * @return an Optional containing the StockIssuance if found, otherwise empty.
      */
     Optional<StockIssuance> findById(Long id);
+
+    void save(StockIssuanceDto stockIssuance);
 }

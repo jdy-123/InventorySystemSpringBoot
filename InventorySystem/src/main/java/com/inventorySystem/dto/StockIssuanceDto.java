@@ -15,9 +15,7 @@ public class StockIssuanceDto
 {
 
     private Long id;
-    @NotEmpty(message = "Product Code should not be empty")
     private String productCode;
-    @NotEmpty(message = "Product Name should not be empty")
     private String productName;
     private String date;
     private String quantity;

@@ -2,13 +2,20 @@ package com.inventorySystem.controller;
 
 import com.inventorySystem.Model.StockIssuance;
 import com.inventorySystem.Model.Product;
+import com.inventorySystem.Model.User;
+import com.inventorySystem.dto.StockIssuanceDto;
+import com.inventorySystem.dto.UserDto;
 import com.inventorySystem.service.impl.Product.ProductService;
 import com.inventorySystem.service.impl.StockIssuance.StockIssuanceService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -48,5 +55,29 @@ public class entityController {
         model.addAttribute("totalPages", stockIssuancePage.getTotalPages());  // Ensure correct totalPages based on stockIssuance
 
         return "stockIssuance";
+    }
+
+    // handler method to handle register user form submit request
+    @PostMapping("/stockIssuance/save")
+    public String registration(@Valid @ModelAttribute("stockIssuance") StockIssuanceDto stockIssuance,
+                               BindingResult result,
+                               Model model){
+
+        if (stockIssuance.getQuantity() == null) {
+            result.rejectValue("quantity", null, "Quantity cannot be empty");
+        }
+
+        if (result.hasErrors()) {
+            model.addAttribute("stockIssuance", stockIssuance);
+            return "stockIssuance";
+        }
+        stockIssuanceService.save(stockIssuance);
+        return "redirect:/stockIssuance";
+    }
+
+    @PostMapping("stockIssuance/delete")
+    public String deleteUser(@RequestParam("id") Long id) {
+        stockIssuanceService.deleteById(id);  // Call the service method to delete the user
+        return "redirect:/stockIssuance";  // Redirect back to the list of users
     }
 }
