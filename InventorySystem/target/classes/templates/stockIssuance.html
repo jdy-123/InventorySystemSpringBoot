@@ -323,7 +323,9 @@
                 if (result.status === "success") {
                     modalTitle.textContent = "Success!";
                     modalBody.innerHTML = `<strong>${result.message}</strong>`;
-                    updateTable(result.data); // Update the table if the result is successful
+
+                    // Update the table if the result is successful
+                    window.location.href = '/stockIssuance';  // Replace with the correct URL of your page
                 } else {
                     modalTitle.textContent = "Error!";
                     modalBody.innerHTML = `<strong>${result.message}</strong>`;
@@ -344,9 +346,7 @@
             });
     }
 
-
     function updateTable(newData) {
-        // Select the table body where rows are inserted
         const tableBody = document.querySelector('table tbody');
 
         // Create a new table row
@@ -368,6 +368,7 @@
         // Append the new row to the end of the table
         tableBody.appendChild(row);
     }
+
 
 
     // Function to update quantity without interrupting the flow

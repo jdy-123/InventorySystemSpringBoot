@@ -88,10 +88,11 @@
             <tr th:each="stockIssuance: ${stockIssuance}">
                 <td th:text="${stockIssuance.id}"></td>
                 <td>
-                    <input list="productCodeList" class="form-control productCode" id="productCode" th:value="${stockIssuance.productCode}" disabled /><datalist id="productCodeList">
+                    <input list="productCodeList" class="form-control productCode" id="productCode" th:value="${stockIssuance.productCode}" disabled />
+                    <datalist id="productCodeList">
                     <option th:if="${#lists.isEmpty(products)}" disabled>No products available</option>
                     <option th:each="product : ${products}" th:value="${product.productCode}" th:text="${product.productCode}"></option>
-                </datalist>
+                    </datalist>
                 </td>
                 <td>
                     <input list="productNameList" class="form-control productName" id="productName" th:value="${stockIssuance.productName}" disabled />
@@ -323,7 +324,9 @@
                 if (result.status === "success") {
                     modalTitle.textContent = "Success!";
                     modalBody.innerHTML = `<strong>${result.message}</strong>`;
-                    updateTable(result.data); // Update the table if the result is successful
+
+                    // Update the table if the result is successful
+                    window.location.href = '/stockIssuance';  // Replace with the correct URL of your page
                 } else {
                     modalTitle.textContent = "Error!";
                     modalBody.innerHTML = `<strong>${result.message}</strong>`;
@@ -344,9 +347,7 @@
             });
     }
 
-
     function updateTable(newData) {
-        // Select the table body where rows are inserted
         const tableBody = document.querySelector('table tbody');
 
         // Create a new table row
@@ -368,6 +369,7 @@
         // Append the new row to the end of the table
         tableBody.appendChild(row);
     }
+
 
 
     // Function to update quantity without interrupting the flow
