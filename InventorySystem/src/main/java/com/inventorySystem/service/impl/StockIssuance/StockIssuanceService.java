@@ -4,6 +4,7 @@ import com.inventorySystem.Model.StockIssuance;
 import com.inventorySystem.dto.StockIssuanceDto;
 import org.springframework.data.domain.Page;
 
+import java.util.Map;
 import java.util.Optional;
 
 public interface StockIssuanceService {
@@ -29,5 +30,5 @@ public interface StockIssuanceService {
      */
     Optional<StockIssuance> findById(Long id);
 
-    void save(StockIssuanceDto stockIssuance);
+    Map<String, Object> save(StockIssuanceDto stockIssuance);
 }

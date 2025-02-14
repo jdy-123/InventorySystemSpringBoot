@@ -1,34 +1,41 @@
 package com.inventorySystem.controller;
 
+import com.inventorySystem.Model.Inventory;
 import com.inventorySystem.Model.StockIssuance;
 import com.inventorySystem.Model.Product;
 import com.inventorySystem.Model.User;
 import com.inventorySystem.dto.StockIssuanceDto;
 import com.inventorySystem.dto.UserDto;
+import com.inventorySystem.service.impl.Inventory.InventoryService;
 import com.inventorySystem.service.impl.Product.ProductService;
 import com.inventorySystem.service.impl.StockIssuance.StockIssuanceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Controller
 public class entityController {
 
     private final ProductService productService;
+    private final InventoryService inventoryService;
     private final StockIssuanceService stockIssuanceService;
 
     @Autowired
-    public entityController(ProductService productService, StockIssuanceService stockIssuanceService) {
+    public entityController(ProductService productService, InventoryService inventoryService, StockIssuanceService stockIssuanceService) {
         this.productService = productService;
+        this.inventoryService = inventoryService;
         this.stockIssuanceService = stockIssuanceService;
     }
 
@@ -57,27 +64,49 @@ public class entityController {
         return "stockIssuance";
     }
 
-    // handler method to handle register user form submit request
     @PostMapping("/stockIssuance/save")
-    public String registration(@Valid @ModelAttribute("stockIssuance") StockIssuanceDto stockIssuance,
-                               BindingResult result,
-                               Model model){
+    public ResponseEntity<Map<String, Object>> saveStockIssuance(@RequestBody StockIssuanceDto stockIssuance) {
+        Map<String, Object> response = stockIssuanceService.save(stockIssuance);
 
-        if (stockIssuance.getQuantity() == null) {
-            result.rejectValue("quantity", null, "Quantity cannot be empty");
+        if ("error".equals(response.get("status"))) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        if (result.hasErrors()) {
-            model.addAttribute("stockIssuance", stockIssuance);
-            return "stockIssuance";
-        }
-        stockIssuanceService.save(stockIssuance);
-        return "redirect:/stockIssuance";
+        return ResponseEntity.ok(response);
     }
+
+
+
 
     @PostMapping("stockIssuance/delete")
     public String deleteUser(@RequestParam("id") Long id) {
         stockIssuanceService.deleteById(id);  // Call the service method to delete the user
         return "redirect:/stockIssuance";  // Redirect back to the list of users
     }
+
+    @PostMapping("/updateQuantity")
+    public ResponseEntity<Map<String, String>> updateQuantity(@RequestBody StockIssuanceDto stockIssuance) {
+        Optional<Inventory> inventoryOpt = inventoryService.getInventoryByProductCode(stockIssuance.getProductCode());
+
+        Map<String, String> response = new HashMap<>();
+
+        if (inventoryOpt.isPresent()) {
+            Inventory inventory = inventoryOpt.get();
+            int availableStock = Integer.parseInt(inventory.getEndingInventory());
+            int issuedQuantity = Integer.parseInt(stockIssuance.getQuantity());
+
+            // Update quantity regardless of available stock
+            inventory.setEndingInventory(String.valueOf(availableStock - issuedQuantity));
+            inventoryService.updateInventory(inventory);
+
+            response.put("status", "success");
+            response.put("message", "Quantity updated successfully!");
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("status", "error");
+            response.put("message", "Inventory not found!");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
 }

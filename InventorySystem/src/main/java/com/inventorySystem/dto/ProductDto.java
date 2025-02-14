@@ -14,12 +14,10 @@ public class ProductDto
 {
 
     private String productCode;
-    @NotEmpty(message = "Product Name should not be empty")
     private String productName;
     private String grossPrice;
     private String netPrice;
     private String criticalQuantity;
-    @NotEmpty(message = "Category should not be empty")
     private String category;
     private String unitOfMeasurement;
 }

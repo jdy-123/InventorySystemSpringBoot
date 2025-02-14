@@ -35,10 +35,10 @@ public class Product implements Serializable {
     @Column(nullable = false)
     private String criticalQuantity;
 
-    @Column(nullable = false)
+    @Column
     private String category;
 
-    @Column(nullable = false)
+    @Column
     private String unitOfMeasurement;
 
 }

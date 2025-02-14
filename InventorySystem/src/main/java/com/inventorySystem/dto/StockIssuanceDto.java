@@ -21,7 +21,6 @@ public class StockIssuanceDto
     private String quantity;
     private String grossAmount;
     private String totalCostInGross;
-    @NotEmpty(message = "Shop should not be empty")
     private String shop;
     private String adjustment;
 }

@@ -1,32 +1,38 @@
 package com.inventorySystem.service.impl.StockIssuance;
 
+import com.inventorySystem.Model.Inventory;
 import com.inventorySystem.Model.Product;
 import com.inventorySystem.Model.StockIssuance;
-import com.inventorySystem.Model.User;
 import com.inventorySystem.dto.StockIssuanceDto;
-import com.inventorySystem.dto.UserDto;
 import com.inventorySystem.repository.StockIssuanceRepository;
+import com.inventorySystem.service.impl.Inventory.InventoryService;
 import com.inventorySystem.service.impl.Product.ProductService;
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class StockIssuanceServiceImpl implements StockIssuanceService {
     private final ProductService productService;
     private final StockIssuanceRepository stockIssuanceRepository;
+    private final InventoryService inventoryService;
 
-    public StockIssuanceServiceImpl(ProductService productService, StockIssuanceRepository stockIssuanceRepository) {
+    public StockIssuanceServiceImpl(ProductService productService, StockIssuanceRepository stockIssuanceRepository, InventoryService inventoryService) {
         this.productService = productService;
         this.stockIssuanceRepository = stockIssuanceRepository;
+        this.inventoryService = inventoryService;
     }
 
     @Override
     public Page<StockIssuance> findAllItem(int page, int size) {
-        return stockIssuanceRepository.findAll(PageRequest.of(page, size));
+        return stockIssuanceRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Order.asc("id"))));
     }
 
     @Override
@@ -39,62 +45,87 @@ public class StockIssuanceServiceImpl implements StockIssuanceService {
         return stockIssuanceRepository.findById(id);  // Return StockIssuance by ID wrapped in Optional
     }
 
-    @Override
-    public void save(StockIssuanceDto stockIssuance) {
-        // Ensure stockIssuance is not null
-        if (stockIssuance == null) {
-            throw new IllegalArgumentException("stockIssuance cannot be null");
+    @Transactional
+    public Map<String, Object> save(StockIssuanceDto stockIssuance) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (stockIssuance == null) {
+                response.put("status", "error");
+                response.put("message", "Stock issuance cannot be null");
+                return response;
+            }
+
+            List<Product> productsPage = productService.getAllProducts();
+            if (productsPage.isEmpty()) {
+                response.put("status", "error");
+                response.put("message", "No products found in the database");
+                return response;
+            }
+
+            Optional<Product> matchingProductByCode = productsPage.stream()
+                    .filter(product -> product.getProductCode().equals(stockIssuance.getProductCode()))
+                    .findFirst();
+
+            if (matchingProductByCode.isEmpty()) {
+                response.put("status", "error");
+                response.put("message", "Product not found with product code: " + stockIssuance.getProductCode());
+                return response;
+            }
+
+            Optional<Inventory> inventoryOpt = inventoryService.getInventoryByProductCode(stockIssuance.getProductCode());
+            if (inventoryOpt.isEmpty()) {
+                response.put("status", "error");
+                response.put("message", "No inventory found for product code: " + stockIssuance.getProductCode());
+                return response;
+            }
+
+            Inventory inventory = inventoryOpt.get();
+            int availableStock = Integer.parseInt(inventory.getEndingInventory());
+            int issuedQuantity = Integer.parseInt(stockIssuance.getQuantity());
+
+            if (issuedQuantity > availableStock) {
+                response.put("status", "warning");
+                response.put("message", "Insufficient stock! Available: " + availableStock);
+                return response;
+            }
+
+            inventory.setEndingInventory(String.valueOf(availableStock - issuedQuantity));
+            inventoryService.updateInventory(inventory);
+
+            StockIssuance stock = new StockIssuance();
+            Product product = matchingProductByCode.get();
+            stock.setProductCode(product.getProductCode());
+            stock.setProductName(product.getProductName());
+            stock.setDate(stockIssuance.getDate());
+            stock.setShop(stockIssuance.getShop());
+            stock.setAdjustment(stockIssuance.getAdjustment());
+            stock.setQuantity(stockIssuance.getQuantity());
+            stock.setGrossAmount(product.getGrossPrice());
+
+            double totalCost = tryParseDouble(stock.getQuantity()) * tryParseDouble(stock.getGrossAmount());
+            stock.setTotalCostInGross(String.valueOf(totalCost));
+
+            stockIssuanceRepository.save(stock);
+
+            response.put("status", "success");
+            response.put("message", "Stock issued successfully!");
+            response.put("data", stock); // Send back the saved data to update UI
+        } catch (Exception e) {
+            response.put("status", "error");
+            response.put("message", "An unexpected error occurred: " + e.getMessage());
         }
-
-// Fetch all products
-        List<Product> productsPage = productService.getAllProducts();  // Pagination applied
-
-// Check if the product list is empty
-        if (productsPage.isEmpty()) {
-            // Log or handle this case if needed
-            throw new IllegalStateException("No products found in the database");
-        }
-
-// Find the product with the matching productCode
-        Optional<Product> matchingProductByCode = productsPage.stream()
-                .filter(product -> product.getProductCode().equals(stockIssuance.getProductCode()))
-                .findFirst();
-
-// Find the product with the matching productName
-        Optional<Product> matchingProductByName = productsPage.stream()
-                .filter(product -> product.getProductName().equals(stockIssuance.getProductName()))
-                .findFirst();
-
-        StockIssuance stock = new StockIssuance();
-
-// Assign productCode and productName based on matches
-        if (stockIssuance.getProductCode() == null || stockIssuance.getProductCode().isEmpty()) {
-            // If no match found by productName, use null or a default
-            stock.setProductCode(matchingProductByName.map(Product::getProductCode)
-                    .orElse(null));
-        } else {
-            stock.setProductCode(stockIssuance.getProductCode());
-        }
-
-        if (stockIssuance.getProductName() == null || stockIssuance.getProductName().isEmpty()) {
-            // If no match found by productCode, use null or a default
-            stock.setProductName(matchingProductByCode.map(Product::getProductName)
-                    .orElse(null));
-        } else {
-            stock.setProductName(stockIssuance.getProductName());
-        }
-
-// Further properties and save logic
-        stock.setDate(stockIssuance.getDate());
-        stock.setShop(stockIssuance.getShop());
-        stock.setAdjustment(stockIssuance.getAdjustment());
-        stock.setQuantity(stockIssuance.getQuantity());
-        stock.setGrossAmount(stockIssuance.getGrossAmount());
-        stock.setTotalCostInGross(stockIssuance.getTotalCostInGross());
-
-        stockIssuanceRepository.save(stock);
-
+        return response;
     }
 
+
+
+
+    private double tryParseDouble(String value) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 
 }
