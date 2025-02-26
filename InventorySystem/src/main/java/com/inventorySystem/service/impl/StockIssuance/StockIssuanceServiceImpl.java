@@ -53,7 +53,7 @@ public class StockIssuanceServiceImpl implements StockIssuanceService {
         try {
             if (stockIssuance == null) {
                 response.put("status", "error");
-                response.put("message", "Stock issuance cannot be null");
+                response.put("message", "Stock issuance cannot be null or empty");
                 return response;
             }
 
