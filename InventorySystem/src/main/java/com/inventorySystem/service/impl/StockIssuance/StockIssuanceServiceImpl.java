@@ -8,6 +8,7 @@ import com.inventorySystem.repository.StockIssuanceRepository;
 import com.inventorySystem.service.impl.Inventory.InventoryService;
 import com.inventorySystem.service.impl.Product.ProductService;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -32,7 +33,8 @@ public class StockIssuanceServiceImpl implements StockIssuanceService {
 
     @Override
     public Page<StockIssuance> findAllItem(int page, int size) {
-        return stockIssuanceRepository.findAll(PageRequest.of(page, size, Sort.by(Sort.Order.asc("id"))));
+        Pageable pageable = PageRequest.of(page, size);
+        return stockIssuanceRepository.findAll(pageable);
     }
 
     @Override
@@ -66,16 +68,33 @@ public class StockIssuanceServiceImpl implements StockIssuanceService {
                     .filter(product -> product.getProductCode().equals(stockIssuance.getProductCode()))
                     .findFirst();
 
-            if (matchingProductByCode.isEmpty()) {
+            Optional<Product> matchingProductByName = productsPage.stream()
+                    .filter(product -> product.getProductName().equals(stockIssuance.getProductName()))
+                    .findFirst();
+
+            if (matchingProductByCode.isEmpty() && !stockIssuance.getProductCode().isEmpty()) {
                 response.put("status", "error");
                 response.put("message", "Product not found with product code: " + stockIssuance.getProductCode());
                 return response;
             }
 
-            Optional<Inventory> inventoryOpt = inventoryService.getInventoryByProductCode(stockIssuance.getProductCode());
-            if (inventoryOpt.isEmpty()) {
+            if (matchingProductByName.isEmpty() && !stockIssuance.getProductName().isEmpty()) {
+                response.put("status", "error");
+                response.put("message", "Product not found with product name: " + stockIssuance.getProductName());
+                return response;
+            }
+            Optional<Inventory> inventoryOpt;
+            inventoryOpt = inventoryService.getInventoryByProductCode(stockIssuance.getProductCode());
+            if (inventoryOpt.isEmpty() && !stockIssuance.getProductCode().isEmpty()) {
                 response.put("status", "error");
                 response.put("message", "No inventory found for product code: " + stockIssuance.getProductCode());
+                return response;
+            }
+
+            inventoryOpt = inventoryService.getInventoryByProductName(stockIssuance.getProductName());
+            if (inventoryOpt.isEmpty() && !stockIssuance.getProductName().isEmpty()) {
+                response.put("status", "error");
+                response.put("message", "No inventory found for product name: " + stockIssuance.getProductCode());
                 return response;
             }
 
@@ -93,7 +112,7 @@ public class StockIssuanceServiceImpl implements StockIssuanceService {
             inventoryService.updateInventory(inventory);
 
             StockIssuance stock = new StockIssuance();
-            Product product = matchingProductByCode.get();
+            Product product = stockIssuance.getProductCode().isEmpty() ? matchingProductByName.get() :  matchingProductByCode.get();
             stock.setProductCode(product.getProductCode());
             stock.setProductName(product.getProductName());
             stock.setDate(stockIssuance.getDate());

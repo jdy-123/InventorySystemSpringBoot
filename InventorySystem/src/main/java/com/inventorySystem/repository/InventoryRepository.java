@@ -14,6 +14,11 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
     List<Inventory> findByProductCodeAndDate(@Param("productCode") String productCode,
                                              @Param("formattedDate") String formattedDate);
 
+    @Query("SELECT i FROM Inventory i WHERE i.productName = :productName " +
+            "AND i.date = :formattedDate")
+    List<Inventory> findByProductNameAndDate(@Param("productName") String productName,
+                                             @Param("formattedDate") String formattedDate);
+
 
 
 }

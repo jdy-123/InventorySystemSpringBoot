@@ -88,10 +88,11 @@
             <tr th:each="stockIssuance: ${stockIssuance}">
                 <td th:text="${stockIssuance.id}"></td>
                 <td>
-                    <input list="productCodeList" class="form-control productCode" id="productCode" th:value="${stockIssuance.productCode}" disabled /><datalist id="productCodeList">
+                    <input list="productCodeList" class="form-control productCode" id="productCode" th:value="${stockIssuance.productCode}" disabled />
+                    <datalist id="productCodeList">
                     <option th:if="${#lists.isEmpty(products)}" disabled>No products available</option>
                     <option th:each="product : ${products}" th:value="${product.productCode}" th:text="${product.productCode}"></option>
-                </datalist>
+                    </datalist>
                 </td>
                 <td>
                     <input list="productNameList" class="form-control productName" id="productName" th:value="${stockIssuance.productName}" disabled />

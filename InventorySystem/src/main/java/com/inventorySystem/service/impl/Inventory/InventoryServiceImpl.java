@@ -71,6 +71,21 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public Optional<Inventory> getInventoryByProductName(String productName) {
+        // Get the current month and year in "MMM-yyyy" format (e.g., "Feb-2025")
+        String currentDate = new SimpleDateFormat("MMM-yyyy").format(new Date());
+
+        List<Inventory> inventories = inventoryRepository.findByProductNameAndDate(productName, currentDate);
+
+        if (inventories.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // If multiple records exist, return the most recent one
+        return Optional.of(inventories.get(0));
+    }
+
+    @Override
     public void updateInventory(Inventory inventory) {
         inventoryRepository.save(inventory);
     }

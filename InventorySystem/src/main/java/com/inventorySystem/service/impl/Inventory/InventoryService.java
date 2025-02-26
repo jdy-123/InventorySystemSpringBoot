@@ -32,5 +32,7 @@ public interface InventoryService {
 
     Optional<Inventory> getInventoryByProductCode(String productCode);
 
+    Optional<Inventory> getInventoryByProductName(String productName);
+
     void updateInventory(Inventory inventory);
 }
