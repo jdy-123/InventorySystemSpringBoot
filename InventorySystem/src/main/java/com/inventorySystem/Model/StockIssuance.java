@@ -13,7 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="tblreport")
+@Table(name="tbl_report")
 public class StockIssuance implements Serializable {
 
     private static final long serialVersionUID = 1L;

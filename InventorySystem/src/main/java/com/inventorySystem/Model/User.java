@@ -13,7 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="tbladmin")
+@Table(name="tbl_admin")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 1L;
